@@ -247,4 +247,83 @@ void main() {
     controller.clear();
     expect(controller.text, "");
   });
+
+  test('test_clear_input_bug_with_zero_decimals', () {
+    final controller = CurrencyTextFieldController(numberOfDecimals: 0);
+
+    // Type 123
+    controller.text = "123";
+    expect(controller.text, "R\$ 123");
+    expect(controller.doubleValue, 123.0);
+
+    // Try to clear - this should work but currently doesn't
+    controller.clear();
+    expect(controller.text, "");
+    expect(controller.doubleValue, 0.0);
+  });
+
+  test('test_clear_input_works_with_decimals', () {
+    final controller = CurrencyTextFieldController(numberOfDecimals: 2);
+
+    // Type 123
+    controller.text = "123";
+    expect(controller.text, "R\$ 1,23");
+    expect(controller.doubleValue, 1.23);
+
+    // Try to clear - this should work
+    controller.clear();
+    expect(controller.text, "");
+    expect(controller.doubleValue, 0.0);
+  });
+
+  test('test_delete_characters_one_by_one_with_zero_decimals', () {
+    final controller = CurrencyTextFieldController(numberOfDecimals: 0);
+
+    // Type 123
+    controller.text = "123";
+    expect(controller.text, "R\$ 123");
+    expect(controller.doubleValue, 123.0);
+
+    // Simulate deleting one character at a time (like backspacing)
+    controller.text = "R\$ 12"; // Delete the '3'
+    // This should result in "R\$ 12", but might have issues
+
+    controller.text = "R\$ 1"; // Delete another character
+    // This should result in "R\$ 1"
+
+    controller.text = "R\$"; // Delete the last number
+    // This should clear to empty string
+
+    expect(controller.text, "");
+    expect(controller.doubleValue, 0.0);
+  });
+
+  test('test_empty_string_input_with_zero_decimals', () {
+    final controller = CurrencyTextFieldController(numberOfDecimals: 0);
+
+    // Type 123
+    controller.text = "123";
+    expect(controller.text, "R\$ 123");
+    expect(controller.doubleValue, 123.0);
+
+    // Set text to empty string directly (simulating clearing the field)
+    controller.text = "";
+    expect(controller.text, "");
+    expect(controller.doubleValue, 0.0);
+  });
+
+  test('test_clear_input_with_zero_decimals_and_showZeroValue', () {
+    final controller =
+        CurrencyTextFieldController(numberOfDecimals: 0, showZeroValue: true);
+
+    // Type 123
+    controller.text = "123";
+    expect(controller.text, "R\$ 123");
+    expect(controller.doubleValue, 123.0);
+
+    // Clear the field - should work correctly now (bug fix)
+    controller.text = "";
+    expect(controller.text, "");
+    expect(controller.doubleValue, 0.0);
+  });
 }
